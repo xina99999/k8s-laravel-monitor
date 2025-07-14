@@ -1,47 +1,33 @@
 
 ---
 
-## 🧱 **Task: Cài Minikube hoặc K3s/K3d và kubectl trên Local**
-
-### ✅ Mục tiêu:
-
-* Cài `kubectl` – công cụ dòng lệnh để tương tác với Kubernetes
-* Chọn **Minikube** hoặc **K3s/K3d** để tạo môi trường Kubernetes local
-* Xác nhận cụm hoạt động và chạy thử pod
+## ✅ **Ngày 1 – Task: Cài Minikube hoặc K3s/K3d + kubectl**
 
 ---
 
-## 📌 Phần 1: Cài `kubectl`
+### 🎯 **Mục tiêu cuối ngày**
 
-> `kubectl` là công cụ điều khiển Kubernetes, dùng chung cho cả Minikube và K3s/K3d.
-
-### Bước 1: Cài đặt `kubectl`
-
-```bash
-sudo apt update && sudo apt install -y curl apt-transport-https
-curl -LO "https://dl.k8s.io/release/$(curl -Ls https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-chmod +x kubectl
-sudo mv kubectl /usr/local/bin/
-```
-
-### Bước 2: Kiểm tra phiên bản
-
-```bash
-kubectl version --client
-```
+* Cài đặt thành công Minikube hoặc K3s/K3d
+* Cài `kubectl` và chạy được lệnh `kubectl get nodes`
+* Cluster hoạt động, đã sẵn sàng cho việc tạo Pod
 
 ---
 
-## 📦 **Phần 2A: Cài đặt với Minikube (ưu tiên học tập)**
+### 🧰 1. **Chọn nền tảng triển khai local**
 
-### Bước 1: Cài Minikube
+| Tên          | Mô tả                                    | Gợi ý dùng                    |
+| ------------ | ---------------------------------------- | ----------------------------- |
+| **Minikube** | Dễ dùng, hỗ trợ tốt Docker               | ✅ Dành cho học tập            |
+| **K3s**      | Nhẹ, tối ưu cho môi trường resource thấp | VPS / Raspberry Pi            |
+| **K3d**      | K3s chạy trong Docker                    | Máy cấu hình yếu + muốn nhanh |
 
-```bash
-curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-sudo install minikube-linux-amd64 /usr/local/bin/minikube
-```
+👉 **Khuyên dùng Minikube** nếu bạn đang học trên **Ubuntu, WSL hoặc máy Linux/Mac**, dùng Docker làm runtime.
 
-### Bước 2: Cài Docker (nếu chưa có)
+---
+
+### 🛠️ 2. **Cài đặt Minikube + kubectl**
+
+#### ✅ Bước 1: Cài Docker (nếu chưa có)
 
 ```bash
 sudo apt update
@@ -50,13 +36,43 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-### Bước 3: Khởi tạo cluster Minikube
+#### ✅ Bước 2: Cài `kubectl`
+
+```bash
+curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+chmod +x kubectl
+sudo mv kubectl /usr/local/bin/
+kubectl version --client
+```
+
+#### ✅ Bước 3: Cài **Minikube**
+
+```bash
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+```
+
+> Kiểm tra:
+
+```bash
+minikube version
+```
+
+---
+
+### 🚀 3. **Khởi động Minikube cluster**
 
 ```bash
 minikube start --driver=docker
 ```
 
-### Bước 4: Kiểm tra cluster
+> Nếu không có Docker Desktop mà đang dùng Linux:
+
+```bash
+minikube start --driver=none
+```
+
+> Kiểm tra:
 
 ```bash
 kubectl get nodes
@@ -64,75 +80,58 @@ kubectl get nodes
 
 ---
 
-## 🚀 **Phần 2B: (Tùy chọn)** Cài K3s hoặc K3d
+### 📦 4. (Optional) Cài K3s hoặc K3d
 
----
-
-### 🥦 Nếu chọn **K3s** (siêu nhẹ, 1 node)
-
-### Bước 1: Cài đặt
+#### ✅ Cài K3s (chạy trực tiếp)
 
 ```bash
 curl -sfL https://get.k3s.io | sh -
+sudo kubectl get node
 ```
 
-### Bước 2: Kiểm tra cluster
-
-```bash
-sudo kubectl get nodes
-```
-
-> Lưu ý: với K3s thì `kubectl` sẽ nằm ở `/usr/local/bin/kubectl` và config tại `/etc/rancher/k3s/k3s.yaml`
-
----
-
-### 🐳 Nếu chọn **K3d** (chạy K3s trong Docker)
-
-### Bước 1: Cài K3d
+#### ✅ Cài K3d (chạy trong Docker)
 
 ```bash
 curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-```
-
-### Bước 2: Tạo cluster
-
-```bash
 k3d cluster create mycluster
-```
-
-### Bước 3: Kiểm tra cluster
-
-```bash
 kubectl get nodes
 ```
 
 ---
 
-## 🧪 Phần 3: Kiểm tra cụm Kubernetes hoạt động
-
-### Tạo một Pod đơn giản:
+### 🧪 5. Kiểm tra Minikube hoạt động
 
 ```bash
-kubectl run nginx --image=nginx --port=80
-kubectl get pods
-```
-
-### Truy cập pod:
-
-```bash
-kubectl expose pod nginx --type=NodePort --port=80
-minikube service nginx  # (nếu dùng Minikube)
+kubectl cluster-info
+kubectl get pods -A
 ```
 
 ---
 
-## 📝 Ghi chú:
+### 📌 Ghi chú sau khi hoàn thành
 
-| Tool     | Ưu điểm                       | Nhược điểm               |
-| -------- | ----------------------------- | ------------------------ |
-| Minikube | Dễ dùng, hỗ trợ GUI dashboard | Nặng hơn, khởi động chậm |
-| K3s      | Nhẹ, gần với production       | Cấu hình root nhiều hơn  |
-| K3d      | Chạy bằng Docker, linh hoạt   | Yêu cầu Docker chạy tốt  |
+* Nếu cài Minikube, bạn có thể bật dashboard:
+
+```bash
+minikube dashboard
+```
+
+* Nếu lỗi "no nodes available" → kiểm tra Docker đã chạy chưa:
+
+```bash
+sudo systemctl status docker
+```
+
+---
+
+### ✅ Kết quả kỳ vọng
+
+| Nội dung                             | Trạng thái |
+| ------------------------------------ | ---------- |
+| Cài `kubectl` thành công             | ✅          |
+| Cluster Minikube hoặc K3s chạy được  | ✅          |
+| `kubectl get nodes` hiển thị `Ready` | ✅          |
+| Sẵn sàng tạo pod/deployment          | ✅          |
 
 ---
 
